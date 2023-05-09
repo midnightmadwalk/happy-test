@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mario Game</title>
+    <style>
+      .bg {
+
+        background-image: url("bg.jpg");
+      }
+      #player {
+        position: absolute;
+        width: 100px;
+        height: 150px;
+        bottom: 0;
+      }
+      .obstacle {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        background-color: #f00;
+        bottom: 0;
+      }
+    </style>
+  </head>
+  <body class="bg">
+    <h1>Mario Game</h1>
+    <div id="game-container">
+      <img id="player" src="cat2.gif"/></div>
+    </div>
+
+    <script>
+      // Player object
+      const player = document.getElementById("player");
+
+      // Game constants
+      const gameContainer = document.getElementById("game-container");
+      const containerWidth = gameContainer.offsetWidth;
+      const playerWidth = player.offsetWidth;
+
+      // Player position
+      let playerX = containerWidth / 2 - playerWidth / 2;
+      let isJumping = false;
+      let jumpTimeout;
+
+      // Keyboard input handling
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "ArrowLeft") {
+          movePlayer(-10); // Move left
+        } else if (event.key === "ArrowRight") {
+          movePlayer(10); // Move right
+        } else if (event.key === "ArrowUp") {
+          jump();
+        }
+      });
+
+      document.addEventListener("keyup", function (event) {
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+          stopMoving(); // Stop moving
+        }
+      });
+
+      // Function to move the player
+      let moveInterval;
+      function movePlayer(deltaX) {
+        stopMoving();
+        moveInterval = setInterval(function () {
+          playerX += deltaX;
+          player.style.left = playerX + "px";
+
+          // Check if player is out of bounds
+          if (playerX < 0) {
+            playerX = 0;
+          } else if (playerX > containerWidth - playerWidth) {
+            playerX = containerWidth - playerWidth;
+          }
+        }, 10);
+      }
+
+      // Function to stop player movement
+      function stopMoving() {
+        clearInterval(moveInterval);
+      }
+
+      function createObstacle(x, y) {
+            const obstacle = document.createElement("obstacle");
+            obstacle.className = "obstacle";
+            obstacle.style.left = x + "px";
+            obstacle.style.top = y + "px";
+            gameContainer.appendChild(obstacle);
+            obstacles.push(obstacle);
+          }
+          createObstacle(650, 350); 
+          function checkCollision(elem1, elem2) {
+            const rect1 = elem1.getBoundingClientRect();
+            const rect2 = elem2.getBoundingClientRect();
+            return !(
+              rect1.right < rect2.left ||
+              rect1.left > rect2.right ||
+              rect1.bottom < rect2.top ||
+              rect1.top > rect2.bottom
+            );
+          }
+
+          // Function to update game state
+          function updateGame() {
+            // Check collision between player and obstacles
+            obstacles.forEach(function (obstacle) {
+              if (checkCollision(player, obstacle)) {
+                // Collision occurred, handle accordingly (e.g., game over)
+                console.log("Collision occurred!");
+              }
+            });
+
+            // Call updateGame() recursively to continuously check for collisions
+            requestAnimationFrame(updateGame);
+          }
+
+          // Call updateGame() to start the game loop
+          updateGame();
+      // Function to make the player jump
+      function jump() {
+        if (!isJumping) {
+          isJumping = true;
+          let jumpHeight = 100; // Adjust as needed
+          let jumpDuration = 1000; // Adjust as needed
+          let jumpStartTime = Date.now();
+          let jumpEndTime = jumpStartTime + jumpDuration;
+
+
+          function animateJump() {
+            let now = Date.now();
+            let remainingTime = jumpEndTime - now;
+            let progress = 1 - remainingTime / jumpDuration;
+
+            // Calculate the player's vertical position during the jump
+            let verticalPosition = jumpHeight * 4 * progress * (1 - progress);
+            player.style.bottom = verticalPosition + "px";
+
+            if (now < jumpEndTime) {
+              requestAnimationFrame(animateJump);
+            } else {
+              player.style.bottom = "0";
+              isJumping = false;
+            }
+          }
+
+          animateJump();
+        }
+      }
+    </script>
+  </body>
+</html>
