@@ -30,8 +30,31 @@
 
     <script>
       // Player object
-      const player = document.getElementById("player");
+      // const player = document.getElementById("player");
+      class Player {
+        constructor({
 
+          position = { x: 0, y: 0 },
+          width = 100,
+          height = 100,
+          velocity = { x: 0, y: 0 }
+        }) {
+          this.position = position
+          this.width = width
+          this.height = height
+          this.velocity = velocity
+          this.player = document.getElementById("player");
+        }
+
+        draw() {
+          c.strokeRect(this.position.x, this.position.y, this.width, this.height)
+        }
+
+        update() {
+          this.position.x += this.velocity.x
+          this.position.y += this.velocity.y
+        }
+      }
       // Game constants
       const gameContainer = document.getElementById("game-container");
       const containerWidth = gameContainer.offsetWidth;
@@ -58,7 +81,6 @@
           stopMoving(); // Stop moving
         }
       });
-
       // Function to move the player
       let moveInterval;
       function movePlayer(deltaX) {
@@ -81,42 +103,32 @@
         clearInterval(moveInterval);
       }
 
-      function createObstacle(x, y) {
-            const obstacle = document.createElement("obstacle");
-            obstacle.className = "obstacle";
-            obstacle.style.left = x + "px";
-            obstacle.style.top = y + "px";
-            gameContainer.appendChild(obstacle);
-            obstacles.push(obstacle);
-          }
-          createObstacle(650, 350); 
-          function checkCollision(elem1, elem2) {
-            const rect1 = elem1.getBoundingClientRect();
-            const rect2 = elem2.getBoundingClientRect();
-            return !(
-              rect1.right < rect2.left ||
-              rect1.left > rect2.right ||
-              rect1.bottom < rect2.top ||
-              rect1.top > rect2.bottom
-            );
-          }
+      function Obstacle(x, y, width, height) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.color = "#00ff00";
 
-          // Function to update game state
-          function updateGame() {
-            // Check collision between player and obstacles
-            obstacles.forEach(function (obstacle) {
-              if (checkCollision(player, obstacle)) {
-                // Collision occurred, handle accordingly (e.g., game over)
-                console.log("Collision occurred!");
-              }
-            });
+            this.draw = function() {
+                context.fillStyle = this.color;
+                context.fillRect(this.x, this.y, this.width, this.height);
+            }
+        }
 
-            // Call updateGame() recursively to continuously check for collisions
-            requestAnimationFrame(updateGame);
-          }
+        obstacle = new Obstacle(650, 350, 100, 50);
 
-          // Call updateGame() to start the game loop
-          updateGame();
+      function collision({ player, obstacle }) {
+        return (
+          player.position.x + player.width >= obstacle.position.x && // player right collides with obstacle left
+          obstacle.position.x + obstacle.width >= player.position.x && // obstacle right collides with player left
+          player.position.y + player.height >= obstacle.position.y && // player bottom collides with obstacle top
+          obstacle.position.y + obstacle.height >= player.position.y // player top collides with obstacle bottom
+        )
+      }
+      if (collision({ player, obstacle })) {
+         obstacle.color = 'green'
+      } 
       // Function to make the player jump
       function jump() {
         if (!isJumping) {
@@ -125,7 +137,6 @@
           let jumpDuration = 1000; // Adjust as needed
           let jumpStartTime = Date.now();
           let jumpEndTime = jumpStartTime + jumpDuration;
-
 
           function animateJump() {
             let now = Date.now();
@@ -150,3 +161,6 @@
     </script>
   </body>
 </html>
+
+
+
